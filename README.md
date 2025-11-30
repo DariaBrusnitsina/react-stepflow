@@ -1,4 +1,5 @@
 # React Step Flow
+<img width="1187" height="776" alt="Снимок экрана 2025-12-01 в 00 38 26" src="https://github.com/user-attachments/assets/cb90daca-19e2-41c8-9b74-648be0ae8257" />
 
 A universal, production-ready step-by-step form component (Wizard) built with React, TypeScript, and XState. This library provides a flexible and powerful solution for creating multi-step forms with state management, validation, conditional steps, and smooth animations.
 
