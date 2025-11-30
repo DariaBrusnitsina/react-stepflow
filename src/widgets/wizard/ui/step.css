@@ -1,0 +1,104 @@
+/* Step Component Styles */
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: stepContentFadeIn 0.3s ease-in-out;
+}
+
+@keyframes stepContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-title {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #212121;
+}
+
+.step-content {
+  min-height: 200px;
+}
+
+.step-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.step-button {
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.step-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.step-button:active {
+  transform: translateY(0);
+}
+
+.step-button-back {
+  background-color: #f5f5f5;
+  color: #424242;
+}
+
+.step-button-back:hover {
+  background-color: #eeeeee;
+}
+
+.step-button-next,
+.step-button-submit {
+  background-color: #1976d2;
+  color: white;
+}
+
+.step-button-next:hover,
+.step-button-submit:hover {
+  background-color: #1565c0;
+}
+
+.step-errors {
+  padding: 12px 16px;
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+.error-message {
+  color: #c62828;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.step-success-message {
+  padding: 20px;
+  background-color: #e8f5e9;
+  border: 1px solid #4caf50;
+  border-radius: 8px;
+  color: #2e7d32;
+  font-weight: 500;
+  text-align: center;
+  font-size: 16px;
+}
