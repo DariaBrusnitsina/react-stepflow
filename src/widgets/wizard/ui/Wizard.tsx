@@ -296,7 +296,7 @@ export const Wizard: React.FC<WizardProps> = ({
       // Small delay to ensure DOM is updated
       setTimeout(() => {
         // Scroll wizard content to top smoothly
-        if (wizardContentRef.current) {
+        if (wizardContentRef.current && typeof wizardContentRef.current.scrollTo === 'function') {
           wizardContentRef.current.scrollTo({
             top: 0,
             behavior: 'smooth',
@@ -304,7 +304,7 @@ export const Wizard: React.FC<WizardProps> = ({
         }
         // Also scroll window to top if needed
         const wizardElement = document.querySelector('.wizard');
-        if (wizardElement) {
+        if (wizardElement && typeof wizardElement.scrollIntoView === 'function') {
           wizardElement.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
