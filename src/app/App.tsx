@@ -1,8 +1,51 @@
+/**
+ * Example Application: Cleaning Service Subscription Form
+ *
+ * This file demonstrates how to use the Wizard component library to create
+ * a multi-step form with validation, conditional steps, and custom styling.
+ *
+ * Project Structure:
+ * - This file (App.tsx): Main application component with form structure
+ * - ./schemas.ts: Zod validation schemas for all form steps
+ * - ./constants.ts: Mock data and constants (select options, initial values)
+ * - ./styles.css: Application-specific styles (not part of the library)
+ *
+ * Library Components Used:
+ * - Wizard: Main wrapper component managing form state and navigation
+ * - Step: Individual form step with built-in validation and navigation buttons
+ * - Input, Checkbox, Radio, Textarea, Select: Form input components
+ * - TariffCard: Custom card component for tariff selection
+ *
+ * Key Features Demonstrated:
+ * - Multi-step form with conditional steps (individual vs business clients)
+ * - Zod schema validation with custom error messages
+ * - Pre-selected default values for radio buttons and selects
+ * - Dynamic step visibility based on form data
+ * - Custom styling and UI/UX enhancements
+ */
+
 import React from 'react';
-import { z } from 'zod';
 import { Wizard, useWizard } from '@/widgets/wizard';
 import { Step } from '@/widgets/wizard';
 import { Input, Checkbox, Radio, Textarea, Select, TariffCard } from '@/shared/ui';
+import {
+  clientTypeSchema,
+  individualPersonalInfoSchema,
+  businessInfoSchema,
+  addressSchema,
+  cleaningDetailsSchema,
+  businessCleaningDetailsSchema,
+  additionalServicesSchema,
+  tariffSchema,
+  agreementSchema,
+} from './schemas';
+import {
+  frequencies,
+  cleaningTypes,
+  businessFrequencies,
+  businessCleaningTypes,
+  initialFormData,
+} from './constants';
 import './styles.css';
 
 const Summary: React.FC = () => {
@@ -16,148 +59,15 @@ const Summary: React.FC = () => {
   );
 };
 
-// Zod schemas for validation
-const clientTypeSchema = z.object({
-  clientType: z.enum(['individual', 'business'], {
-    message: 'Please select a client type',
-  }),
-});
-
-const individualPersonalInfoSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, 'First name must be at least 2 characters')
-    .max(50, 'First name must be less than 50 characters'),
-  lastName: z
-    .string()
-    .min(2, 'Last name must be at least 2 characters')
-    .max(50, 'Last name must be less than 50 characters'),
-  phone: z
-    .string()
-    .min(10, 'Phone number must be at least 10 digits')
-    .regex(/^[\d\s\-+()]+$/, {
-      message: 'Please enter a valid phone number',
-    }),
-  email: z.string().email('Please enter a valid email address'),
-});
-
-const businessInfoSchema = z.object({
-  companyName: z
-    .string()
-    .min(2, 'Company name must be at least 2 characters')
-    .max(100, 'Company name must be less than 100 characters'),
-  contactPerson: z.string().min(2, 'Contact person name must be at least 2 characters'),
-  phone: z
-    .string()
-    .min(10, 'Phone number must be at least 10 digits')
-    .regex(/^[\d\s\-+()]+$/, {
-      message: 'Please enter a valid phone number',
-    }),
-  email: z.string().email('Please enter a valid email address'),
-  taxId: z.string().min(5, 'Tax ID must be at least 5 characters').optional().or(z.literal('')),
-});
-
-const addressSchema = z.object({
-  address: z.string().min(5, 'Address must be at least 5 characters'),
-  city: z.string().min(2, 'City must be at least 2 characters'),
-  zipCode: z
-    .string()
-    .min(4, 'Zip code must be at least 4 characters')
-    .max(10, 'Zip code must be less than 10 characters'),
-  apartment: z.string().optional().or(z.literal('')),
-});
-
-const cleaningDetailsSchema = z.object({
-  area: z.coerce
-    .number()
-    .int('Area must be a whole number')
-    .min(10, 'Area must be at least 10 m²')
-    .max(1000, 'Area must be less than 1000 m²'),
-  frequency: z.string().min(1, 'Please select cleaning frequency'),
-  cleaningType: z.string().min(1, 'Please select cleaning type'),
-});
-
-const businessCleaningDetailsSchema = z.object({
-  area: z.coerce
-    .number()
-    .int('Area must be a whole number')
-    .min(20, 'Area must be at least 20 m²')
-    .max(5000, 'Area must be less than 5000 m²'),
-  frequency: z.string().min(1, 'Please select cleaning frequency'),
-  cleaningType: z.string().min(1, 'Please select cleaning type'),
-  employees: z.coerce
-    .number()
-    .int('Number of employees must be a whole number')
-    .min(1, 'Must have at least 1 employee')
-    .max(1000, 'Too many employees'),
-});
-
-const additionalServicesSchema = z.object({
-  additionalServices: z.any().optional(),
-});
-
-const tariffSchema = z.object({
-  tariff: z.enum(['basic', 'standard', 'premium'], {
-    message: 'Please select a tariff plan',
-  }),
-});
-
-const agreementSchema = z.object({
-  agree: z.boolean().refine((val) => val === true, {
-    message: 'You must agree to the terms and conditions',
-  }),
-  privacyPolicy: z.boolean().refine((val) => val === true, {
-    message: 'You must agree to the privacy policy',
-  }),
-});
-
 export const App: React.FC = () => {
   const handleFinish = (_data: Record<string, any>) => {
     alert('Order submitted! Check console for data.');
   };
 
-  const frequencies = [
-    { value: 'once', label: 'One-time cleaning' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'biweekly', label: 'Bi-weekly (every 2 weeks)' },
-    { value: 'monthly', label: 'Monthly' },
-  ];
-
-  const cleaningTypes = [
-    { value: 'regular', label: 'Regular cleaning' },
-    { value: 'deep', label: 'Deep cleaning' },
-    { value: 'post-renovation', label: 'Post-renovation cleaning' },
-    { value: 'move-in', label: 'Move-in/Move-out cleaning' },
-  ];
-
-  const businessFrequencies = [
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekdays', label: 'Weekdays (Mon-Fri)' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'biweekly', label: 'Bi-weekly' },
-    { value: 'monthly', label: 'Monthly' },
-  ];
-
-  const businessCleaningTypes = [
-    { value: 'office', label: 'Office cleaning' },
-    { value: 'deep', label: 'Deep cleaning' },
-    { value: 'window', label: 'Window cleaning' },
-    { value: 'carpet', label: 'Carpet cleaning' },
-  ];
-
   return (
     <div className="app">
       <h1>Cleaning Service Subscription</h1>
-      <Wizard
-        onFinish={handleFinish}
-        debug={true}
-        initialData={{
-          clientType: 'individual',
-          frequency: 'weekly',
-          cleaningType: 'regular',
-          tariff: 'standard',
-        }}
-      >
+      <Wizard onFinish={handleFinish} debug={true} initialData={initialFormData}>
         <Step title="Welcome" customNextLabel="Get Started">
           <div className="welcome-step">
             <div className="welcome-header">

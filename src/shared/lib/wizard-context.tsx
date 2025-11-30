@@ -5,6 +5,8 @@ interface WizardFormContextValue {
   values: WizardData;
   setValue: (name: string, value: any) => void;
   getValue: (name: string) => any;
+  errors: Record<string, string>;
+  setErrors: (errors: Record<string, string>) => void;
 }
 
 const WizardFormContext = createContext<WizardFormContextValue | null>(null);
@@ -31,6 +33,7 @@ export const WizardFormProvider: React.FC<WizardFormProviderProps> = ({
   // Since Wizard uses key={stepIndex}, this component will remount on step change
   // So we can safely use initialValues as the initial state
   const [values, setValues] = useState<WizardData>(initialValues);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const onValuesChangeRef = useRef(onValuesChange);
   onValuesChangeRef.current = onValuesChange;
 
@@ -38,6 +41,12 @@ export const WizardFormProvider: React.FC<WizardFormProviderProps> = ({
     setValues((prev) => {
       const newValues = { ...prev, [name]: value };
       onValuesChangeRef.current?.(newValues);
+      // Clear error for this field when user starts typing
+      setErrors((prevErrors) => {
+        const newErrors = { ...prevErrors };
+        delete newErrors[name];
+        return newErrors;
+      });
       return newValues;
     });
   }, []);
@@ -50,7 +59,7 @@ export const WizardFormProvider: React.FC<WizardFormProviderProps> = ({
   );
 
   return (
-    <WizardFormContext.Provider value={{ values, setValue, getValue }}>
+    <WizardFormContext.Provider value={{ values, setValue, getValue, errors, setErrors }}>
       {children}
     </WizardFormContext.Provider>
   );

@@ -33,7 +33,24 @@ npm test
 
 # Run tests with coverage
 npm run test:coverage
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
 ```
+
+## Pre-commit Hooks
+
+This project uses [Husky](https://typicode.github.io/husky/) to run checks before each commit:
+
+- **Lint-staged**: Automatically lints and formats staged files (`.ts`, `.tsx`, `.js`, `.jsx`, `.json`, `.css`, `.md`)
+- **Tests**: Runs all tests before allowing the commit
+
+If any check fails, the commit will be blocked. This ensures code quality and prevents broken code from being committed.
+
+To bypass hooks (not recommended), use `git commit --no-verify`.
 
 ## Deployment to GitHub Pages
 
@@ -98,17 +115,17 @@ The main wrapper component that manages form steps and state using XState.
 
 **Props:**
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `children` | `ReactNode` | Array of `<Step />` components |
-| `onFinish` | `(data: Record<string, any>) => void` | Callback function called after the last step |
-| `initialData?` | `Record<string, any>` | Initial form state |
-| `debug?` | `boolean` | Enable XState state logging to console |
+| Prop           | Type                                  | Description                                  |
+| -------------- | ------------------------------------- | -------------------------------------------- |
+| `children`     | `ReactNode`                           | Array of `<Step />` components               |
+| `onFinish`     | `(data: Record<string, any>) => void` | Callback function called after the last step |
+| `initialData?` | `Record<string, any>`                 | Initial form state                           |
+| `debug?`       | `boolean`                             | Enable XState state logging to console       |
 
 **Example:**
 
 ```tsx
-<Wizard 
+<Wizard
   onFinish={(data) => {
     console.log('Form submitted:', data);
     // Send to server
@@ -126,25 +143,25 @@ Wrapper component for a single form step with built-in validation and navigation
 
 **Props:**
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `children` | `ReactNode` | Step content |
-| `title?` | `string` | Step title (optional) |
-| `validate?` | `(data: Record<string, any>) => boolean \| string[]` | Custom validation function |
-| `schema?` | `z.ZodSchema<any>` | Zod schema for validation |
-| `condition?` | `(data: Record<string, any>) => boolean` | Conditional function for step display |
-| `hideDefaultButtons?` | `boolean` | Hide default Next/Back buttons |
-| `customNextLabel?` | `string` | Custom Next button text |
-| `customSubmitLabel?` | `string` | Custom Submit button text (on last step) |
+| Prop                  | Type                                                 | Description                              |
+| --------------------- | ---------------------------------------------------- | ---------------------------------------- |
+| `children`            | `ReactNode`                                          | Step content                             |
+| `title?`              | `string`                                             | Step title (optional)                    |
+| `validate?`           | `(data: Record<string, any>) => boolean \| string[]` | Custom validation function               |
+| `schema?`             | `z.ZodSchema<any>`                                   | Zod schema for validation                |
+| `condition?`          | `(data: Record<string, any>) => boolean`             | Conditional function for step display    |
+| `hideDefaultButtons?` | `boolean`                                            | Hide default Next/Back buttons           |
+| `customNextLabel?`    | `string`                                             | Custom Next button text                  |
+| `customSubmitLabel?`  | `string`                                             | Custom Submit button text (on last step) |
 
 **Example:**
 
 ```tsx
-<Step 
+<Step
   title="Personal Information"
   schema={z.object({
     firstName: z.string().min(2),
-    email: z.string().email()
+    email: z.string().email(),
   })}
   condition={(data) => data.userType === 'individual'}
 >
@@ -187,10 +204,12 @@ Hook for accessing navigation functions and form data from components inside ste
 ```tsx
 const MyComponent = () => {
   const { goNext, goBack, currentStep, totalSteps, data } = useWizard();
-  
+
   return (
     <div>
-      <p>Step {currentStep + 1} of {totalSteps}</p>
+      <p>
+        Step {currentStep + 1} of {totalSteps}
+      </p>
       <button onClick={goBack}>Back</button>
       <button onClick={goNext}>Next</button>
     </div>
@@ -217,13 +236,8 @@ Hook for working with controlled inputs inside steps. Automatically syncs with t
 ```tsx
 const CustomInput = ({ name }) => {
   const { values, setValue } = useWizardForm();
-  
-  return (
-    <input
-      value={values[name] || ''}
-      onChange={(e) => setValue(name, e.target.value)}
-    />
-  );
+
+  return <input value={values[name] || ''} onChange={(e) => setValue(name, e.target.value)} />;
 };
 ```
 
@@ -236,11 +250,7 @@ The library includes a set of pre-built form components that automatically integ
 Controlled input component that automatically syncs with form state.
 
 ```tsx
-<Input 
-  name="firstName" 
-  type="text"
-  placeholder="Enter your first name"
-/>
+<Input name="firstName" type="text" placeholder="Enter your first name" />
 ```
 
 **Supported types:** `text`, `email`, `tel`, `number`, `date`, `url`, etc.
@@ -250,11 +260,7 @@ Controlled input component that automatically syncs with form state.
 Controlled textarea component.
 
 ```tsx
-<Textarea 
-  name="description" 
-  rows={4}
-  placeholder="Enter description"
-/>
+<Textarea name="description" rows={4} placeholder="Enter description" />
 ```
 
 ### `<Checkbox />`
@@ -289,11 +295,11 @@ Controlled radio button component.
 Controlled select dropdown component.
 
 ```tsx
-<Select 
+<Select
   name="country"
   options={[
     { value: 'us', label: 'United States' },
-    { value: 'uk', label: 'United Kingdom' }
+    { value: 'uk', label: 'United Kingdom' },
   ]}
   required
 />
@@ -331,7 +337,7 @@ const personalInfoSchema = z.object({
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().regex(/^[\d\s\-\+\(\)]+$/, {
-    message: 'Please enter a valid phone number'
+    message: 'Please enter a valid phone number',
   }),
 });
 
@@ -340,7 +346,7 @@ const personalInfoSchema = z.object({
   <Input name="lastName" />
   <Input name="email" type="email" />
   <Input name="phone" type="tel" />
-</Step>
+</Step>;
 ```
 
 ### 2. Custom Validation Function
@@ -348,19 +354,19 @@ const personalInfoSchema = z.object({
 For more complex validation logic:
 
 ```tsx
-<Step 
+<Step
   title="Step 1"
   validate={(data) => {
     const errors: string[] = [];
-    
+
     if (!data.name) {
       errors.push('Name is required');
     }
-    
+
     if (data.age && data.age < 18) {
       errors.push('You must be at least 18 years old');
     }
-    
+
     return errors.length > 0 ? errors : true;
   }}
 >
@@ -370,6 +376,7 @@ For more complex validation logic:
 ```
 
 **Validation Return Types:**
+
 - `true` - Validation passed
 - `false` - Validation failed (generic error)
 - `string[]` - Array of error messages
@@ -381,7 +388,7 @@ If validation fails, navigation is blocked and errors are displayed below the st
 Steps can be conditionally shown or hidden based on form data:
 
 ```tsx
-<Step 
+<Step
   title="Individual Information"
   condition={(data) => data.clientType === 'individual'}
 >
@@ -389,7 +396,7 @@ Steps can be conditionally shown or hidden based on form data:
   <Input name="lastName" />
 </Step>
 
-<Step 
+<Step
   title="Business Information"
   condition={(data) => data.clientType === 'business'}
 >
@@ -432,7 +439,7 @@ function App() {
   };
 
   return (
-    <Wizard 
+    <Wizard
       onFinish={handleFinish}
       initialData={{
         clientType: 'individual',
@@ -455,7 +462,7 @@ function App() {
         </Radio>
       </Step>
 
-      <Step 
+      <Step
         title="Personal Information"
         condition={(data) => data.clientType === 'individual'}
         schema={personalInfoSchema}
@@ -465,9 +472,12 @@ function App() {
         <Input name="email" type="email" placeholder="Email" />
       </Step>
 
-      <Step title="Choose Plan" schema={z.object({
-        tariff: z.enum(['basic', 'standard', 'premium']),
-      })}>
+      <Step
+        title="Choose Plan"
+        schema={z.object({
+          tariff: z.enum(['basic', 'standard', 'premium']),
+        })}
+      >
         <TariffCard
           name="tariff"
           value="basic"
@@ -493,9 +503,7 @@ function App() {
       </Step>
 
       <Step title="Agreement" schema={agreementSchema}>
-        <Checkbox name="agree">
-          I agree to the terms and conditions
-        </Checkbox>
+        <Checkbox name="agree">I agree to the terms and conditions</Checkbox>
       </Step>
 
       <Step title="Review">
@@ -507,7 +515,7 @@ function App() {
 
 const Summary = () => {
   const { data } = useWizard();
-  
+
   return (
     <div>
       <h3>Review Your Information</h3>
@@ -561,6 +569,7 @@ All styles are automatically imported when using the components. You can overrid
 ### Mobile Responsiveness
 
 The step indicator automatically adapts to mobile screens:
+
 - Horizontal layout on mobile
 - Compact circles without labels
 - Thin connecting lines
@@ -571,12 +580,7 @@ The step indicator automatically adapts to mobile screens:
 All components are fully typed with TypeScript. Main types are exported:
 
 ```tsx
-import type { 
-  WizardProps,
-  StepProps,
-  WizardData,
-  ValidationResult 
-} from '@/widgets/wizard';
+import type { WizardProps, StepProps, WizardData, ValidationResult } from '@/widgets/wizard';
 ```
 
 ## Testing

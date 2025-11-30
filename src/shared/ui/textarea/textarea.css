@@ -1,0 +1,30 @@
+.textarea-wrapper {
+  width: 100%;
+}
+
+.textarea-field {
+  width: 100%;
+}
+
+.textarea-field-error {
+  border-color: #f44336 !important;
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2) !important;
+}
+
+.textarea-error {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #f44336;
+  animation: errorFadeIn 0.2s ease-out;
+}
+
+@keyframes errorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -30,25 +30,43 @@ export const Step: React.FC<StepProps> = ({
   customSubmitLabel = 'Submit',
 }) => {
   const { goNext, goBack, finish, isFirstStep, isLastStep, isFinished, updateData } = useWizard();
-  const { values } = useWizardForm();
-  const [errors, setErrors] = useState<string[]>([]);
+  const { values, setErrors: setFormErrors } = useWizardForm();
+  const [generalErrors, setGeneralErrors] = useState<string[]>([]);
 
   const handleNext = useCallback(() => {
+    // Clear previous errors
+    setFormErrors({});
+    setGeneralErrors([]);
+
     // First, try Zod schema validation if provided
     if (schema) {
       try {
         schema.parse(values);
-        setErrors([]);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          const errorMessages = error.issues.map((issue) => {
-            const path = issue.path.join('.');
-            return path ? `${path}: ${issue.message}` : issue.message;
+          const fieldErrors: Record<string, string> = {};
+          const generalErrorMessages: string[] = [];
+
+          error.issues.forEach((issue) => {
+            const fieldName = issue.path[0] as string;
+            const errorMessage = issue.message;
+
+            if (fieldName) {
+              // Field-specific error
+              fieldErrors[fieldName] = errorMessage;
+            } else {
+              // General error (no field path)
+              generalErrorMessages.push(errorMessage);
+            }
           });
-          setErrors(errorMessages);
+
+          setFormErrors(fieldErrors);
+          if (generalErrorMessages.length > 0) {
+            setGeneralErrors(generalErrorMessages);
+          }
           return;
         }
-        setErrors(['Validation failed']);
+        setGeneralErrors(['Validation failed']);
         return;
       }
     }
@@ -57,16 +75,32 @@ export const Step: React.FC<StepProps> = ({
     if (validate) {
       const validationResult = validate(values);
       if (validationResult === false) {
-        setErrors(['Validation failed']);
+        setGeneralErrors(['Validation failed']);
         return;
       }
       if (Array.isArray(validationResult) && validationResult.length > 0) {
-        setErrors(validationResult);
+        // Try to parse field-specific errors from custom validation
+        const fieldErrors: Record<string, string> = {};
+        const generalErrorMessages: string[] = [];
+
+        validationResult.forEach((errorMsg) => {
+          // Check if error message is in format "fieldName: message"
+          const match = errorMsg.match(/^([^:]+):\s*(.+)$/);
+          if (match) {
+            const [, fieldName, message] = match;
+            fieldErrors[fieldName.trim()] = message.trim();
+          } else {
+            generalErrorMessages.push(errorMsg);
+          }
+        });
+
+        setFormErrors(fieldErrors);
+        if (generalErrorMessages.length > 0) {
+          setGeneralErrors(generalErrorMessages);
+        }
         return;
       }
     }
-
-    setErrors([]);
 
     // Collect data from form context and update wizard state
     updateData(values);
@@ -76,25 +110,65 @@ export const Step: React.FC<StepProps> = ({
     } else {
       goNext();
     }
-  }, [validate, schema, values, isLastStep, updateData, finish, goNext]);
+  }, [validate, schema, values, isLastStep, updateData, finish, goNext, setFormErrors]);
 
   const handleBack = useCallback(() => {
-    setErrors([]);
+    setFormErrors({});
+    setGeneralErrors([]);
     updateData(values);
     goBack();
-  }, [values, updateData, goBack]);
+  }, [values, updateData, goBack, setFormErrors]);
 
   return (
     <div className="step">
       {title && <h2 className="step-title">{title}</h2>}
       <div className="step-content">{children}</div>
-      {errors.length > 0 && (
-        <div className="step-errors">
-          {errors.map((error, index) => (
-            <div key={index} className="error-message">
-              {error}
-            </div>
-          ))}
+      {generalErrors.length > 0 && (
+        <div className="step-errors" role="alert" aria-live="polite">
+          <div className="step-errors-header">
+            <svg
+              className="step-errors-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M10 6V10"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M10 14H10.01"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="step-errors-title">
+              {generalErrors.length === 1
+                ? 'Validation Error'
+                : `${generalErrors.length} Validation Errors`}
+            </span>
+          </div>
+          <ul className="step-errors-list">
+            {generalErrors.map((error, index) => (
+              <li key={index} className="error-message">
+                {error}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
       {!hideDefaultButtons && !isFinished && (
